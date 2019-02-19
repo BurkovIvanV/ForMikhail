@@ -73,6 +73,20 @@ public class JavaTestingClass {
             }
         }
     }
+    public static ArrayList<WebElement> getMessagesOnPage()
+    {
+        ArrayList<WebElement> messagesOnPage = new ArrayList<WebElement>();
+        int amountOfMessages = messagesCount();
+        for (int i = 1; i< amountOfMessages; i++) {
+            String xpathMessage = "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div["
+                    + i + ']';
+            WebElement message = driver.findElement(By.xpath(xpathMessage));
+            messagesOnPage.add(message);
+            }
+            return messagesOnPage;
+    }
+
+
 
     public static ArrayList <String> deletingMessages(String email) {
         ArrayList <String> deleteedMessages = new ArrayList<String>();
@@ -111,7 +125,7 @@ public class JavaTestingClass {
         Assert.assertEquals(res, trueResult);
     }
     @Test
-    public void deletingMessagesTest() {
+    public void deletingMessagesTest() {//тут пока написана ерунда, лучше не пытаться вникать
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         ArrayList<String> deletedMessage = new ArrayList<String>();
