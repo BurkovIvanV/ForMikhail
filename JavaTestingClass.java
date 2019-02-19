@@ -27,25 +27,26 @@ public class JavaTestingClass {
     public static void main(String args[]) {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        deletingMessages("utka.burkov@yandex.ru");
 
-        //settingLanguage("English");
-        //settingLanguage("Русский");
-        // writeMessage();
+        // deletingMessages("utka.burkov@yandex.ru");
+        // sendMessage();
         // deletingMessages("utka.burkov@yandex.ru");
 
         // driver.close();
     }
 
-    public static void settingLanguage(String language) {
+    public static String swithchOverLanguage() {
         By setting = By.xpath("//div[contains(@class, 'mail-Settings-Controls')]/a");
         driver.findElement(setting).click();
         driver.findElement(By.xpath("//span[@class='settings-popup-title-content']")).click();
         driver.findElement(By.xpath("//span[contains(@class, 'Settings-Lang_arrow')]")).click();
-        By languageXpath = By.xpath("//div[@class = 'b-mail-dropdown__box__content']//*[contains(text(),'" + language + "')]");
+        By languageXpath = By.xpath("//div[@class='b-mail-dropdown__box__content']/div[1]");
+        String newLanguage = driver.findElement(languageXpath).getText().trim();
         driver.findElement(languageXpath).click();
+
         wait.until(ExpectedConditions.visibilityOfElementLocated(setting));
         driver.navigate().to("https://mail.yandex.ru");
+        return newLanguage;
     }
 
     public static String signIn(String userEmail, String userPassword) {
@@ -66,7 +67,8 @@ public class JavaTestingClass {
 
 
     public static ArrayList<WebElement> getMessagesOnPage() {
-        ArrayList<WebElement> messagesOnPage = (ArrayList<WebElement>) driver.findElements(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div//span[@class='mail-MessageSnippet-FromText']"));
+        ArrayList<WebElement> messagesOnPage = (ArrayList<WebElement>) driver.findElements(By.xpath(
+                "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div//span[@class='mail-MessageSnippet-FromText']"));
         return messagesOnPage;
     }
 
@@ -88,7 +90,7 @@ public class JavaTestingClass {
         return deletedMessages;
     }
 
-    public static void writeMessage() {
+    public static void sendMessage() {
         By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonWriteMessage).click();
         By receiver = By.xpath("//div[@class='js-compose-field mail-Bubbles']");
@@ -97,11 +99,31 @@ public class JavaTestingClass {
         driver.findElement(title).sendKeys("Тестирование");
         By textOfMessage = By.xpath("//div[contains(@class,'cke_show_borders')]");
         driver.findElement(textOfMessage).sendKeys("testing test");
-        By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@title, 'Отправить письмо')]");
+        By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@class, 'ui-button-text-only')]");
         driver.findElement(buttonSend).click();
-        driver.get("https://mail.yandex.ru");
+        //driver.switchTo().alert().accept();
     }
 
+    @Test
+    public static void settingLanguageTest() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+        String trueLanguage = swithchOverLanguage();
+        String currentLanguage =
+                driver.findElement(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")).getAttribute("title").trim();
+        Assert.assertEquals(trueLanguage, currentLanguage);
+    }
+
+    @Test
+    public static void sendMessageTest() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+        String titleInfo = "";
+        sendMessage();
+        titleInfo = driver.findElement(By.xpath("//div[@class='mail-Done-Title js-title-info']")).getText();
+        Assert.assertEquals(titleInfo, "Письмо отправлено.");
+    }
 
     @Test
     public void sigInTest() {
