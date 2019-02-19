@@ -6,6 +6,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -14,32 +15,34 @@ public class JavaTestingClass {
     private static WebDriver driver;
     private static WebDriverWait wait;
 
-    public static  void settingDriver()
-    {
+    public static void settingDriver() {
         System.setProperty("webdriver.chrome.driver", "D:\\Иван Вадимович\\СТАЖИРОВКА\\seleniumweb\\driversSel\\chromedriver.exe");
 
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.manage().window().maximize();
-        wait = new WebDriverWait(driver,10);
+        wait = new WebDriverWait(driver, 10);
     }
+
     public static void main(String args[]) {
         settingDriver();
-        signIn( "Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        //settingLanguage("English");
-        //settingLanguage("Русский");
-       // writeMessage();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         deletingMessages("utka.burkov@yandex.ru");
 
-       // driver.close();
+        //settingLanguage("English");
+        //settingLanguage("Русский");
+        // writeMessage();
+        // deletingMessages("utka.burkov@yandex.ru");
+
+        // driver.close();
     }
-    public static void settingLanguage(String language)
-    {
+
+    public static void settingLanguage(String language) {
         By setting = By.xpath("//div[contains(@class, 'mail-Settings-Controls')]/a");
         driver.findElement(setting).click();
         driver.findElement(By.xpath("//span[@class='settings-popup-title-content']")).click();
         driver.findElement(By.xpath("//span[contains(@class, 'Settings-Lang_arrow')]")).click();
-        By languageXpath = By.xpath("//div[@class = 'b-mail-dropdown__box__content']//*[contains(text(),'"+language+"')]");
+        By languageXpath = By.xpath("//div[@class = 'b-mail-dropdown__box__content']//*[contains(text(),'" + language + "')]");
         driver.findElement(languageXpath).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(setting));
         driver.navigate().to("https://mail.yandex.ru");
@@ -53,7 +56,7 @@ public class JavaTestingClass {
         driver.findElement(By.xpath("//button[@type='submit']")).click();
 
         String result = driver.findElement(By.xpath("//div[@class='personal__security-level']")).getText();
-        System.out.println(result);
+
         driver.findElement(By.xpath("//span[text()='van.Burkov2043']")).click();
         driver.findElement(By.xpath("/html/body/div[2]/div/ul/ul/li[2]/a")).click();
 
@@ -62,44 +65,27 @@ public class JavaTestingClass {
     }
 
 
-    public static int messagesCount() {
-        WebElement lastLetter = driver.findElement(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div[last()]"));
-        for (int i = 1; ; i++) {
-            String xpathLetter = "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div["
-                    + i + ']';
-            WebElement letter = driver.findElement(By.xpath(xpathLetter));
-            if (lastLetter.getText().equals(letter.getText())) {
-                return i;
-            }
-        }
-    }
-    public static ArrayList<WebElement> getMessagesOnPage()
-    {
-        ArrayList<WebElement> messagesOnPage = new ArrayList<WebElement>();
-        int amountOfMessages = messagesCount();
-        for (int i = 1; i< amountOfMessages; i++) {
-            String xpathMessage = "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div["
-                    + i + ']';
-            WebElement message = driver.findElement(By.xpath(xpathMessage));
-            messagesOnPage.add(message);
-            }
-            return messagesOnPage;
+    public static ArrayList<WebElement> getMessagesOnPage() {
+        ArrayList<WebElement> messagesOnPage = (ArrayList<WebElement>) driver.findElements(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div//span[@class='mail-MessageSnippet-FromText']"));
+        return messagesOnPage;
     }
 
 
-
-    public static ArrayList <String> deletingMessages(String email) {
-        ArrayList <String> deleteedMessages = new ArrayList<String>();
-        int amountOfMessages = messagesCount();
-        for (int i = 1; i <= amountOfMessages; i++) {
-            String xpath = "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div[" + i + "]//span[@class='mail-MessageSnippet-FromText']";
-            WebElement message = driver.findElement(By.xpath(xpath));
-            if (message.getAttribute("title").equals(email))
-                driver.findElement(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div[" + i + "]//span[@class='_nb-checkbox-flag _nb-checkbox-normal-flag']")).click();
-                deleteedMessages.add(message.getText());
+    public static ArrayList<WebElement> deletingMessages(String email) {
+        ArrayList<WebElement> messagesOnPage = getMessagesOnPage();
+        ArrayList<WebElement> deletedMessages;
+        deletedMessages = (ArrayList<WebElement>) driver.findElements(By.xpath("//span[@title='" + email + "']"));
+        for (WebElement message : messagesOnPage) {
+            if (message.getAttribute("title").equals(email)) {
+                int numberOfMessage = messagesOnPage.indexOf(message) + 1;
+                driver.findElement(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']" +
+                        "/div[" + numberOfMessage + "]//span[@class='_nb-checkbox-flag _nb-checkbox-normal-flag']")).click();
+                //break;
+            }
         }
         driver.findElement(By.xpath("//span[contains(@class,'js-toolbar-item-title-delete')]")).click();
-        return deleteedMessages;
+        System.out.println(deletedMessages.size());
+        return deletedMessages;
     }
 
     public static void writeMessage() {
@@ -124,27 +110,20 @@ public class JavaTestingClass {
         String trueResult = "Аккаунт надёжно защищён";
         Assert.assertEquals(res, trueResult);
     }
+
     @Test
-    public void deletingMessagesTest() {//тут пока написана ерунда, лучше не пытаться вникать
+    public void deletingMessagesTest() {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        ArrayList<String> deletedMessage = new ArrayList<String>();
-        deletedMessage = deletingMessages("utka.burkov@yandex.ru");
-        int amountOfMessages = messagesCount();
-        for (int i = 1; i < amountOfMessages; i++) {
-            String xpath = "//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div[" + i + "]//span[@class='mail-MessageSnippet-FromText']";
-            WebElement message = driver.findElement(By.xpath(xpath));
-            if (message.getText().equals(deletedMessage.get(0)))
+
+        ArrayList<WebElement> deletedMessages;
+        ArrayList<WebElement> messagesOnPage;
+        deletedMessages = deletingMessages("utka.burkov@yandex.ru");
+        messagesOnPage = getMessagesOnPage();
+        for (WebElement deletedMessage : deletedMessages) {
+            if (messagesOnPage.contains(deletedMessage))
                 Assert.assertTrue(false);
         }
         Assert.assertTrue(true);
     }
-
-
 }
-    //привязываемся к тайтлу
-    //wait.until
-    //методы с маленькой буквы
-    //глобальный вебдрайвер
-    //настройки и вход на сайт сделать в отдельный метод
-    //сложные действия на яндекс почте, лиюо аккуратно привязались
