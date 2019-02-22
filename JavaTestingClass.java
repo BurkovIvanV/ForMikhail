@@ -9,6 +9,8 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaTestingClass {
 
@@ -90,22 +92,31 @@ public class JavaTestingClass {
         return deletedMessages;
     }
 
-    public static void sendMessage() {
+    public static void sendingMessage() {
+        String email = "utka.burkov@yandex.ru";
         By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonWriteMessage).click();
         By receiver = By.xpath("//div[@class='js-compose-field mail-Bubbles']");
-        driver.findElement(receiver).sendKeys("utka.burkov@yandex.ru");
+        driver.findElement(receiver).sendKeys(email);
         By title = By.xpath("//input[contains(@class,'js-compose-field js-editor-tabfocus')]");
         driver.findElement(title).sendKeys("Тестирование");
         By textOfMessage = By.xpath("//div[contains(@class,'cke_show_borders')]");
         driver.findElement(textOfMessage).sendKeys("testing test");
-        By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@class, 'ui-button-text-only')]");
-        driver.findElement(buttonSend).click();
+
         //driver.switchTo().alert().accept();
     }
 
+    public static void clickSendMessageButton() {
+        By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@class, 'ui-button-text-only')]");
+        driver.findElement(buttonSend).click();
+    }
+
+    public static boolean IsElementExists(By xpathElement) {
+        return driver.findElements(xpathElement).size() > 0;
+    }
+
     @Test
-    public static void settingLanguageTest() {
+    public static void switchOverLanguageTest() {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
 
@@ -116,21 +127,34 @@ public class JavaTestingClass {
     }
 
     @Test
-    public static void sendMessageTest() {
+    public static void sendingMessageTest() {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        String titleInfo = "";
-        sendMessage();
-        titleInfo = driver.findElement(By.xpath("//div[@class='mail-Done-Title js-title-info']")).getText();
-        Assert.assertEquals(titleInfo, "Письмо отправлено.");
+
+        sendingMessage();
+        String currentEmail = driver.findElement
+                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value");
+        String emailPattern = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+        Pattern pattern = Pattern.compile(emailPattern);
+        Matcher matcher = pattern.matcher(currentEmail);
+        boolean isEmailCorrect = matcher.matches();
+        clickSendMessageButton();
+        By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
+
+        if (IsElementExists(titleInfoXpath) && isEmailCorrect) {
+            Assert.assertTrue(true);
+        } else if (isEmailCorrect == false && IsElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]"))) {
+            Assert.assertTrue(true);
+        } else Assert.assertTrue(false);
     }
 
     @Test
     public void sigInTest() {
         settingDriver();
         String res = signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        String trueResult = "Аккаунт надёжно защищён";
-        Assert.assertEquals(res, trueResult);
+        if (res.equals("Account is well protected") || res.equals("Аккаунт надёжно защищён"))
+            Assert.assertTrue(true);
+        else Assert.assertTrue(false);
     }
 
     @Test
