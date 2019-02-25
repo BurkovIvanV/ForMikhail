@@ -2,7 +2,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -27,29 +26,17 @@ public class JavaTestingClass {
     }
 
     public static void main(String args[]) {
-        settingDriver();
-        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-
+        //settingDriver();
+        //signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+        //swithchOverLanguage();
         // deletingMessages("utka.burkov@yandex.ru");
         // sendMessage();
         // deletingMessages("utka.burkov@yandex.ru");
 
         // driver.close();
+       // System.out.println(isEmailCorrect("utka.burkov@yandex.ru"));
     }
 
-    public static String swithchOverLanguage() {
-        By setting = By.xpath("//div[contains(@class, 'mail-Settings-Controls')]/a");
-        driver.findElement(setting).click();
-        driver.findElement(By.xpath("//span[@class='settings-popup-title-content']")).click();
-        driver.findElement(By.xpath("//span[contains(@class, 'Settings-Lang_arrow')]")).click();
-        By languageXpath = By.xpath("//div[@class='b-mail-dropdown__box__content']/div[1]");
-        String newLanguage = driver.findElement(languageXpath).getText().trim();
-        driver.findElement(languageXpath).click();
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(setting));
-        driver.navigate().to("https://mail.yandex.ru");
-        return newLanguage;
-    }
 
     public static String signIn(String userEmail, String userPassword) {
         driver.get("https://passport.yandex.ru");
@@ -67,6 +54,32 @@ public class JavaTestingClass {
         return result;
     }
 
+    public static String swithchOverLanguage() {
+
+        clickSettingButton();
+        openLanguageList();
+        By languageXpath = By.xpath("//div[@class='b-mail-dropdown__box__content']/div[1]");
+        String newLanguage = driver.findElement(languageXpath).getText().trim();
+        driver.findElement(languageXpath).click();
+        //wait.until(ExpectedConditions.visibilityOfElementLocated(setting));
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        driver.findElement(By.xpath("//a[@class='b-setup-title__link']")).click();
+        return newLanguage;
+    }
+
+    public static void clickSettingButton() {
+        By setting = By.xpath("//div[contains(@class, 'mail-Settings-Controls')]/a");
+        driver.findElement(setting).click();
+        driver.findElement(By.xpath("//span[@class='settings-popup-title-content']")).click();
+    }
+
+    public static void openLanguageList() {
+        driver.findElement(By.xpath("//span[contains(@class, 'Settings-Lang_arrow')]")).click();
+    }
 
     public static ArrayList<WebElement> getMessagesOnPage() {
         ArrayList<WebElement> messagesOnPage = (ArrayList<WebElement>) driver.findElements(By.xpath(
@@ -87,12 +100,16 @@ public class JavaTestingClass {
                 //break;
             }
         }
-        driver.findElement(By.xpath("//span[contains(@class,'js-toolbar-item-title-delete')]")).click();
-        System.out.println(deletedMessages.size());
         return deletedMessages;
     }
 
-    public static void sendingMessage() {
+    public static void clickDeleteMessageButton() {
+        driver.findElement(By.xpath("//span[contains(@class,'js-toolbar-item-title-delete')]")).click();
+    }
+
+
+    public static void sendingMessageTrueEmail() {
+        clickComposeButton();
         String email = "utka.burkov@yandex.ru";
         By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonWriteMessage).click();
@@ -102,7 +119,22 @@ public class JavaTestingClass {
         driver.findElement(title).sendKeys("Тестирование");
         By textOfMessage = By.xpath("//div[contains(@class,'cke_show_borders')]");
         driver.findElement(textOfMessage).sendKeys("testing test");
+        //driver.switchTo().alert().accept();
+       // clickSendMessageButton();
+    }
 
+    public static void sendingMessageFalseEmail() {
+        clickComposeButton();
+        String email = "utka.burkovyandex.ru";
+        By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
+        driver.findElement(buttonWriteMessage).click();
+        By receiver = By.xpath("//div[@class='js-compose-field mail-Bubbles']");
+        driver.findElement(receiver).sendKeys(email);
+        By title = By.xpath("//input[contains(@class,'js-compose-field js-editor-tabfocus')]");
+        driver.findElement(title).sendKeys("Тестирование");
+        By textOfMessage = By.xpath("//div[contains(@class,'cke_show_borders')]");
+        driver.findElement(textOfMessage).sendKeys("testing test");
+        //clickSendMessageButton();
         //driver.switchTo().alert().accept();
     }
 
@@ -110,42 +142,20 @@ public class JavaTestingClass {
         By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@class, 'ui-button-text-only')]");
         driver.findElement(buttonSend).click();
     }
+    public static void clickComposeButton(){
+        By buttonSend = By.xpath("//span[@class='mail-ComposeButton-Text']");
+        driver.findElement(buttonSend).click();
+    }
 
-    public static boolean IsElementExists(By xpathElement) {
+    public static boolean isElementExists(By xpathElement) {
         return driver.findElements(xpathElement).size() > 0;
     }
 
-    @Test
-    public static void switchOverLanguageTest() {
-        settingDriver();
-        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-
-        String trueLanguage = swithchOverLanguage();
-        String currentLanguage =
-                driver.findElement(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")).getAttribute("title").trim();
-        Assert.assertEquals(trueLanguage, currentLanguage);
-    }
-
-    @Test
-    public static void sendingMessageTest() {
-        settingDriver();
-        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-
-        sendingMessage();
-        String currentEmail = driver.findElement
-                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value");
+    public static boolean isEmailCorrect (String email) {
         String emailPattern = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
         Pattern pattern = Pattern.compile(emailPattern);
-        Matcher matcher = pattern.matcher(currentEmail);
-        boolean isEmailCorrect = matcher.matches();
-        clickSendMessageButton();
-        By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
-
-        if (IsElementExists(titleInfoXpath) && isEmailCorrect) {
-            Assert.assertTrue(true);
-        } else if (isEmailCorrect == false && IsElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]"))) {
-            Assert.assertTrue(true);
-        } else Assert.assertTrue(false);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
     }
 
     @Test
@@ -157,8 +167,21 @@ public class JavaTestingClass {
         else Assert.assertTrue(false);
     }
 
+
     @Test
-    public void deletingMessagesTest() {
+    public static void switchOverLanguageTest() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+        String trueLanguage = swithchOverLanguage();
+
+        String currentLanguage =
+                driver.findElement(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")).getAttribute("title").trim();
+        Assert.assertEquals(trueLanguage, currentLanguage);
+    }
+
+    @Test
+    public void deletingMessagesTestWithoutClick() {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
 
@@ -172,4 +195,60 @@ public class JavaTestingClass {
         }
         Assert.assertTrue(true);
     }
+    @Test
+    public static void deletingMessagesTestWithClick() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+        ArrayList<WebElement> deletedMessages;
+        ArrayList<WebElement> messagesOnPage;
+        deletedMessages = deletingMessages("utka.burkov@yandex.ru");
+        clickDeleteMessageButton();
+        messagesOnPage = getMessagesOnPage();
+        for (WebElement deletedMessage : deletedMessages) {
+            if (messagesOnPage.contains(deletedMessage))
+                Assert.assertTrue(false);
+        }
+        Assert.assertTrue(true);
+    }
+
+    @Test
+    public static void sendingMessageTestWithTrueEmail() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+        sendingMessageTrueEmail();
+        String currentEmail = driver.findElement
+                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value").trim();
+
+        clickSendMessageButton();
+        By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
+        boolean isEmailCorrect = isEmailCorrect(currentEmail);
+        if (isElementExists(titleInfoXpath) && isEmailCorrect) {
+            Assert.assertTrue(true);
+        } else if (isEmailCorrect == false && isElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]"))) {
+            Assert.assertTrue(true);
+        } else Assert.assertTrue(false);
+    }
+
+    @Test
+    public static void sendingMessageTestWithWrongEmail() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+        sendingMessageFalseEmail();
+        String currentEmail = driver.findElement
+                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value").trim();
+        boolean isEmailCorrect = isEmailCorrect(currentEmail);
+        clickSendMessageButton();
+        By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
+
+        if (isElementExists(titleInfoXpath)==true && isEmailCorrect==true) {
+            Assert.assertTrue(true);
+        } else if (isEmailCorrect == false && isElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]"))) {
+            Assert.assertTrue(true);
+        } else Assert.assertTrue(false);
+    }
+
+
 }
