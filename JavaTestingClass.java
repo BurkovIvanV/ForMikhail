@@ -2,6 +2,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -26,8 +27,11 @@ public class JavaTestingClass {
     }
 
     public static void main(String args[]) {
-        //settingDriver();
-        //signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+
+
+
         //swithchOverLanguage();
         // deletingMessages("utka.burkov@yandex.ru");
         // sendMessage();
@@ -113,7 +117,8 @@ public class JavaTestingClass {
         String email = "utka.burkov@yandex.ru";
         By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonWriteMessage).click();
-        By receiver = By.xpath("//div[@class='js-compose-field mail-Bubbles']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+        By receiver = By.xpath("//div[@class = 'js-compose-field mail-Bubbles']");
         driver.findElement(receiver).sendKeys(email);
         By title = By.xpath("//input[contains(@class,'js-compose-field js-editor-tabfocus')]");
         driver.findElement(title).sendKeys("Тестирование");
@@ -128,7 +133,9 @@ public class JavaTestingClass {
         String email = "utka.burkovyandex.ru";
         By buttonWriteMessage = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonWriteMessage).click();
-        By receiver = By.xpath("//div[@class='js-compose-field mail-Bubbles']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+        By receiver = By.xpath("//div[@class = 'js-compose-field mail-Bubbles']");
+
         driver.findElement(receiver).sendKeys(email);
         By title = By.xpath("//input[contains(@class,'js-compose-field js-editor-tabfocus')]");
         driver.findElement(title).sendKeys("Тестирование");
@@ -219,8 +226,7 @@ public class JavaTestingClass {
 
         sendingMessageTrueEmail();
         String currentEmail = driver.findElement
-                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value").trim();
-
+                (By.xpath("//div[@class='js-compose-field mail-Bubbles mail-Bubbles-Sms']/span")).getAttribute("data-yabble-email");
         clickSendMessageButton();
         By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
         boolean isEmailCorrect = isEmailCorrect(currentEmail);
@@ -237,11 +243,12 @@ public class JavaTestingClass {
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
 
         sendingMessageFalseEmail();
+
         String currentEmail = driver.findElement
-                (By.xpath("//input[@class='js-suggest-proxy _init ui-autocomplete-input ui-autocomplete-loading']")).getAttribute("value").trim();
-        boolean isEmailCorrect = isEmailCorrect(currentEmail);
+                (By.xpath("//div[@class='js-compose-field mail-Bubbles mail-Bubbles-Sms']/span")).getAttribute("data-yabble-email");
         clickSendMessageButton();
         By titleInfoXpath = By.xpath("//div[@class='mail-Done-Title js-title-info']");
+        boolean isEmailCorrect = isEmailCorrect(currentEmail);
 
         if (isElementExists(titleInfoXpath)==true && isEmailCorrect==true) {
             Assert.assertTrue(true);
