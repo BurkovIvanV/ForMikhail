@@ -24,7 +24,7 @@ public class JavaTestingClass {
 
     // <editor-fold defaultstate="collapsed" desc="Setting and Sign in">
     public static void settingDriver() {
-        System.setProperty("webdriver.chrome.driver", "D:\\Иван Вадимович\\СТАЖИРОВКА\\seleniumweb\\driversSel\\chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "D:\\Иван Вадимович(уд)\\ABC\\chromedriver.exe");
 
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -144,6 +144,17 @@ public class JavaTestingClass {
             Assert.fail("Email is invalid");
         else Assert.assertTrue(false);
     }
+    public static void waitUntil(String xpath)
+    {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
+    }
+    @Test
+    public void sigInTest() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+        Assert.assertTrue(isElementExists(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+
+    }
 
     @Test
     public static void switchOverLanguageTest() {
@@ -161,11 +172,10 @@ public class JavaTestingClass {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         clickComposeButton();
-        String email = "ivan.burkov2043@yandex.ru";
-        writingEmail(email);
+        writingEmail("ivan.burkov2043@yandex.ru");
         writingTitle("Testing");
         clickSendMessageButton();
-        checkSendingMessage(email);
+        checkSendingMessage("ivan.burkov2043@yandex.ru");
     }
 
     @Test
@@ -174,11 +184,10 @@ public class JavaTestingClass {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         clickComposeButton();
-        String email = "ivan.burkov2043@yandexru";
-        writingEmail(email);
+        writingEmail("ivan.burkov2043@yandexru");
         writingTitle("Testing");
         clickSendMessageButton();
-        checkSendingMessage(email);
+        checkSendingMessage("ivan.burkov2043@yandexru");
     }
 
     @Test
@@ -188,7 +197,7 @@ public class JavaTestingClass {
         tickMessages("utka.burkov@yandex.ru");
         ArrayList<WebElement> deletedMessages = getTickedMessage();
         clickDeleteMessageButton();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
         ArrayList<WebElement> allMesages = getAllMessagesOnPage();
         for (WebElement deletedMessage : deletedMessages) {
             if (allMesages.contains(deletedMessage))
@@ -196,13 +205,7 @@ public class JavaTestingClass {
         }
     }
 
-    @Test
-    public void sigInTest() {
-        settingDriver();
-        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        Assert.assertTrue(isElementExists(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
 
-    }
 
     @Test
     public void deletingMessagesTestWithoutClick() {
@@ -210,7 +213,7 @@ public class JavaTestingClass {
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         tickMessages("utka.burkov@yandex.ru");
         ArrayList<WebElement> deletedMessages = getTickedMessage();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
         ArrayList<WebElement> allMesages = getAllMessagesOnPage();
         for (WebElement deletedMessage : deletedMessages) {
             if (allMesages.contains(deletedMessage)) {
