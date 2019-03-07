@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 
 public class JavaTestingClass {
 
+    public static String LANGUAGE_BEFORE;
+    public static ArrayList<WebElement> DELETED_MESSAGES;
     private static WebDriver driver;
     private static WebDriverWait wait;
 
@@ -22,16 +24,13 @@ public class JavaTestingClass {
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Setting and Sign in">
     public static void settingDriver() {
-        System.setProperty("webdriver.chrome.driver", "D:\\Иван Вадимович(уд)\\ABC\\chromedriver.exe");
-
+        System.setProperty("webdriver.chrome.driver", "D:\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.manage().window().maximize();
         wait = new WebDriverWait(driver, 10);
     }
-
 
     public static void signIn(String userEmail, String userPassword) {
         driver.get("https://passport.yandex.ru");
@@ -42,10 +41,10 @@ public class JavaTestingClass {
         driver.findElement(By.xpath("//span[text()='van.Burkov2043']")).click();
         driver.findElement(By.xpath("/html/body/div[2]/div/ul/ul/li[2]/a")).click();
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Setting Language">
+
     public static void switchOverLanguage() {
+        LANGUAGE_BEFORE = getCurrentLanguage();
         driver.findElement(By.xpath("//div[@class='b-mail-dropdown__box__content']/div[1]")).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@class='b-setup-title__link']")));
     }
@@ -59,9 +58,7 @@ public class JavaTestingClass {
     public static void openLanguageList() {
         driver.findElement(By.xpath("//span[contains(@class, 'Settings-Lang_arrow')]")).click();
     }
-// </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Deleting Messages">
     public static void tickMessages(String email) {
         int n = driver.findElements(By.xpath("//div[@class='ns-view-container-desc mail-MessagesList js-messages-list']/div")).size();
         for (int i = 1; i <= n; i++) {
@@ -75,11 +72,11 @@ public class JavaTestingClass {
     }
 
     public static void clickDeleteMessageButton() {
+        DELETED_MESSAGES = getTickedMessage();
         driver.findElement(By.xpath("//span[contains(@class,'js-toolbar-item-title-delete')]")).click();
     }
-// </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Sendung Message">
+
     public static void clickComposeButton() {
         By buttonSend = By.xpath("//span[@class='mail-ComposeButton-Text']");
         driver.findElement(buttonSend).click();
@@ -106,9 +103,6 @@ public class JavaTestingClass {
         By buttonSend = By.xpath("//div[contains(@class,'Footer-Main')]//button[contains(@class, 'ui-button-text-only')]");
         driver.findElement(buttonSend).click();
     }
-
-
-    // </editor-fold>
 
     public static boolean isElementExists(By xpathElement) {
         return driver.findElements(xpathElement).size() > 0;
@@ -138,22 +132,38 @@ public class JavaTestingClass {
 
     //@Step
     public static void checkSendingMessage(String email) {
-        if (isElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]")) && isEmailCorrect(email))
+        if (isElementExists(By.xpath("//div[contains(@class,'mail-Compose-Field-Footnote_error')]")) != isEmailCorrect(email))
             Assert.assertTrue(true);
         else if (isEmailCorrect(email) == false)
             Assert.fail("Email is invalid");
         else Assert.assertTrue(false);
     }
-    public static void waitUntil(String xpath)
-    {
+
+    public static void waitUntil(String xpath) {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath)));
     }
-    @Test
-    public void sigInTest() {
-        settingDriver();
-        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
-        Assert.assertTrue(isElementExists(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
 
+    public static void isEmailDeleted() {
+        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
+        ArrayList<WebElement> allMesages = getAllMessagesOnPage();
+        for (WebElement deletedMessage : DELETED_MESSAGES) {
+            if (allMesages.contains(deletedMessage))
+                Assert.assertTrue(false);
+        }
+        //Assert.assertTrue(true);
+    }
+
+    public static void isMessagesWereTicked() {
+        ArrayList<WebElement> tickedMessage = getTickedMessage();
+        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
+        ArrayList<WebElement> messageWhichMustTicked =
+                (ArrayList<WebElement>) driver.findElements
+                        (By.xpath("//span[@title='utka.burkov@yandex.ru']/../../../../../../../.."));
+
+        if (messageWhichMustTicked.equals(tickedMessage))
+            Assert.assertTrue(true);
+        else
+            Assert.fail("Delete message button was not pressed");
     }
 
     @Test
@@ -162,9 +172,8 @@ public class JavaTestingClass {
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         clickSettingButton();
         openLanguageList();
-        String languageBefore = getCurrentLanguage();
         switchOverLanguage();
-        Assert.assertNotEquals(getCurrentLanguage(), languageBefore);
+        Assert.assertNotEquals(getCurrentLanguage(), LANGUAGE_BEFORE);
     }
 
     @Test
@@ -195,31 +204,27 @@ public class JavaTestingClass {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         tickMessages("utka.burkov@yandex.ru");
-        ArrayList<WebElement> deletedMessages = getTickedMessage();
         clickDeleteMessageButton();
-        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
-        ArrayList<WebElement> allMesages = getAllMessagesOnPage();
-        for (WebElement deletedMessage : deletedMessages) {
-            if (allMesages.contains(deletedMessage))
-                Assert.assertTrue(false);
-        }
+        isEmailDeleted();
     }
-
 
 
     @Test
-    public void deletingMessagesTestWithoutClick() {
+    public void sigInTest() {
+        settingDriver();
+        signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
+        Assert.assertTrue(isElementExists(By.xpath("//a[@class='mail-ui-Link mail-ui-ComplexLink']")));
+
+    }
+
+    @Test
+    public void tickMessagesTest() {
         settingDriver();
         signIn("Ivan.Burkov2043@yandex.ru", "mynalegkesnova333");
         tickMessages("utka.burkov@yandex.ru");
-        ArrayList<WebElement> deletedMessages = getTickedMessage();
-        waitUntil("//a[@class='mail-ui-Link mail-ui-ComplexLink']");
-        ArrayList<WebElement> allMesages = getAllMessagesOnPage();
-        for (WebElement deletedMessage : deletedMessages) {
-            if (allMesages.contains(deletedMessage)) {
-                //Assert.assertTrue(false);
-                Assert.fail("Delete message button was not pressed");
-            }
-        }
+        isMessagesWereTicked();
     }
 }
+
+
+
